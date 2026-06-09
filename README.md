@@ -1,7 +1,6 @@
 <div align="center">
 
-<img src="<img width="878" height="312" alt="image" src="https://github.com/user-attachments/assets/2554e11f-6ca6-4865-85cf-7f1803f706b3" />
-" />
+<img width="878" height="312" alt="image" src="https://github.com/user-attachments/assets/2554e11f-6ca6-4865-85cf-7f1803f706b3" />
 
 # VoxDub — AI Video Dubbing
 
