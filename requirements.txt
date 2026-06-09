@@ -1,0 +1,15 @@
+streamlit
+streamlit-option-menu
+imageio-ffmpeg
+
+openai-whisper
+simple-diarizer
+torch
+torchaudio
+
+soundfile
+deep_translator
+
+pydub
+gtts
+
