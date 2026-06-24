@@ -147,14 +147,34 @@ voxdub/
 ## Requirements
 
 ```txt
-streamlit
-openai-whisper
-deep-translator
-gTTS
-imageio-ffmpeg
-pyannote.audio
-python-dotenv
-torch
+# Python 3.11.x
+
+# UI
+streamlit==1.45.1
+
+# Media / FFmpeg
+imageio-ffmpeg==0.6.0
+
+# ASR
+openai-whisper==20231117
+
+# Diarization
+pyannote.audio==3.1.1
+soundfile==0.12.1
+speechbrain==0.5.16
+huggingface-hub==0.23.5
+
+# Translation & TTS
+deep-translator==1.11.4
+gtts==2.5.4
+
+# ML core
+torch==2.3.0
+torchaudio==2.3.0
+numpy==1.26.4
+
+# Env
+python-dotenv==1.0.1
 ```
 
 FFmpeg is bundled via `imageio-ffmpeg` — no system install needed on Windows or macOS.
