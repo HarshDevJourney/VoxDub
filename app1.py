@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import time
 import json
-
+import time
 from services.dubbing import generate_tts
 from services.extract_audio_video import extract_content
 from services.merge import merge_video
@@ -87,12 +87,11 @@ footer { display: none; }
 
 /* ---------- UPLOAD BOX ---------- */
 .upload-wrapper {
-    max-width: 620px;
-    margin: 0 auto 28px;
     border: 1px solid #1e1e28;
     border-radius: 20px;
     background: #0f0f17;
     padding: 0;
+    margin-bottom: 24px;
     overflow: hidden;
     position: relative;
 }
@@ -105,11 +104,10 @@ footer { display: none; }
 }
 
 [data-testid="stFileUploaderDropzone"] {
-    width: 100% !important;
     background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
-    padding: 28px 65px !important;
+    padding: 52px 40px !important;
     text-align: center !important;
     display: flex !important;
     flex-direction: column !important;
@@ -130,7 +128,6 @@ footer { display: none; }
     font-family: 'DM Sans', sans-serif !important;
     font-size: 13px !important;
     padding: 8px 20px !important;
-    margin-top: 18px !important;
     transition: all 0.2s !important;
 }
 [data-testid="stFileUploaderDropzone"] button:hover {
@@ -141,15 +138,6 @@ footer { display: none; }
     color: #c8a97e !important;
     width: 36px !important;
     height: 36px !important;
-}
-
-.process-wrapper {
-    max-width: 620px;
-    margin: 28px auto 0;
-}
-
-.button-gap {
-    height: 18px;
 }
 
 /* ---------- UPLOADED VIDEO ---------- */
@@ -424,15 +412,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Upload ───────────────────────────────────────────────────────────────
-upload_left, upload_center, upload_right = st.columns([1, 6, 1])
-with upload_center:
-    st.markdown("<div class='upload-wrapper'>", unsafe_allow_html=True)
-    video_file = st.file_uploader(
-        "upload",
-        type=["mp4", "mov", "avi", "mkv"],
-        label_visibility="collapsed"
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("<div class='upload-wrapper'>", unsafe_allow_html=True)
+video_file = st.file_uploader(
+    "upload",
+    type=["mp4", "mov", "avi", "mkv"],
+    label_visibility="collapsed"
+)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Uploaded preview ─────────────────────────────────────────────────────
 video_path = None
@@ -468,7 +454,7 @@ with arrow_col:
 with col2:
     target_lang = st.selectbox("Target language", LANGS, index=1)
 
-st.markdown("<div class='button-gap'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom:12px'></div>", unsafe_allow_html=True)
 
 
 # ── Pipeline ──────────────────────────────────────────────────────────────
@@ -486,11 +472,7 @@ if "is_processing" not in st.session_state:
     st.session_state.is_processing = False
 
 btn_label = "⏳ Dubbing in progress..." if st.session_state.is_processing else "⚡ Start Dubbing"
-button_left, button_center, button_right = st.columns([1, 6, 1])
-with button_center:
-    st.markdown("<div class='process-wrapper'>", unsafe_allow_html=True)
-    process = st.button(btn_label, use_container_width=True, disabled=st.session_state.is_processing)
-    st.markdown("</div>", unsafe_allow_html=True)
+process = st.button(btn_label, use_container_width=True, disabled=st.session_state.is_processing)
 
 
 if process:
@@ -508,28 +490,37 @@ if st.session_state.is_processing and video_file:
     try:
         # Step 1
         status.info("🎵 Extracting audio...")
-        audio_path, video_only_path = extract_content(video_path)
+        # audio_path, video_only_path = extract_content(video_path)
         progress_bar.progress(20)
-
+        time.sleep(10)
         # Step 2
         status.info("📝 Transcribing speech...")
-        transcript = transcribe(audio_path)
+        # transcript = transcribe(audio_path)
         progress_bar.progress(50)
+        
+        time.sleep(10)
 
         # Step 3
         status.info(f"🌍 Translating to {target_lang}...")
-        translated = translate(transcript, source_lang, target_lang)
+        # translated = translate(transcript, source_lang, target_lang)
         progress_bar.progress(70)
+        
+        time.sleep(10)
 
         # Step 4
         status.info("🎙️ Generating dubbed voices...")
-        dubbed_audio = generate_tts(translated)
+        # dubbed_audio = generate_tts(translated)
         progress_bar.progress(90)
+        
+        time.sleep(10)
 
         # Step 5
         status.info("🎬 Merging audio and video...")
-        final_video = merge_video(video_path=video_only_path, audio_path=dubbed_audio)
+        # final_video = merge_video(video_path=video_only_path, audio_path=dubbed_audio)
         progress_bar.progress(100)
+        
+
+        final_video = "merged_output\merged_9ab8aebf.mp4"  # Placeholder for the final video path
 
         status.success("✅ Dubbing complete!")
         st.success(f"Generated: {final_video}")

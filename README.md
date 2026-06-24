@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/VoxDub-Studio-c8a97e?style=for-the-badge&labelColor=0a0a0f" alt="VoxDub Studio" />
+![VoxDub Banner](https://github.com/user-attachments/assets/2554e11f-6ca6-4865-85cf-7f1803f706b3)
 
 # VoxDub — AI Video Dubbing
 
-**Automatically dub any video into another language using AI.**  
+**Automatically dub any video into another language using AI.**
 Upload → Transcribe → Translate → Synthesize → Download.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -16,23 +16,60 @@ Upload → Transcribe → Translate → Synthesize → Download.
 
 ---
 
-## What it does
+## Project Resources
 
-VoxDub takes any video file, strips the audio, transcribes the speech with Whisper, translates it, generates new voiced audio with speaker-aware TTS, and merges it back into the original video — all from a single Streamlit UI.
-
-| Step | Tool |
-|------|------|
-| Extract audio | FFmpeg via `imageio-ffmpeg` |
-| Transcribe speech | OpenAI Whisper |
-| Translate text | `deep_translator` (Google Translate) |
-| Generate dubbed audio | gTTS (speaker-aware voices) |
-| Merge back into video | FFmpeg (copy stream + AAC fallback) |
+| Asset | Platform | URL |
+|-------|----------|-----|
+| |
+| Demonstration Demo | Google Drive | [View Demo](https://drive.google.com/drive/folders/1Ph3_UswBHMHVEarztDvkCe9q_sEGWn8a) |
 
 ---
 
-## Screenshots
+## What it does
 
-> Upload a video, pick languages, hit Start Dubbing — get a downloadable dubbed MP4.
+VoxDub is an end-to-end AI video dubbing system that automates the translation and revoicing of spoken content while maintaining timing synchronization. The system ingests source video assets, decouples the underlying audio stream, recognizes and timestamps multi-speaker dialogue, translates text segments into a target language, synthesizes matching vocal assets, and merges the new audio tracks back into the original video container — all orchestrated inside an intuitive web interface.
+
+---
+
+## Technology Stack
+
+| Layer | Core Module | Functional Responsibility |
+|-------|-------------|--------------------------|
+| Backend Runtime | Python 3.10+ | Coordinates sequential lifecycle logic and orchestration pipelines |
+| User Interface | Streamlit | Serves interactive input controls, localized video players, and state handling |
+| Speech Engine | OpenAI Whisper | Provides automated speech recognition (ASR) alongside precise text timestamps |
+| Diarization | PyAnnote.audio | Evaluates voice signatures to classify distinct speaker turns and identities |
+| Translation | deep_translator | Bridges content blocks across structural target language definitions |
+| Voice Synthesis | gTTS | Outputs synthetic localized voice waveforms based on structured string payloads |
+| Media Processing | FFmpeg | Directs audio extraction, bit-rate formatting, timeline syncing, and final muxing |
+
+---
+
+## Processing Pipeline
+
+```
+source_video.mp4
+      │
+      ├─ 1. Video Upload ──────────────► Streamlit UI Hub
+      │
+      ├─ 2. Audio Extraction ──────────► FFmpeg → raw_audio.wav + video_only.mp4
+      │
+      ├─ 3. Transcription ─────────────► OpenAI Whisper → text segments
+      │
+      ├─ 4. Diarization ───────────────► PyAnnote.audio → diarized_metadata.json
+      │
+      ├─ 5. Translation ───────────────► deep_translator → translated_payload.json
+      │
+      ├─ 6. Voice Synthesis ───────────► gTTS Audio Engine → dubbed_voice.mp3
+      │   (per-speaker voices,
+      │    speed-fitted to slots)
+      │
+      ├─ 7. Timing Alignment ──────────► Timestamp Sync → synced_audio.wav
+      │
+      └─ 8. Mux Video Output ──────────► FFmpeg Merge → final_dubbed.mp4
+```
+
+Speaker voices are assigned from a map — each `SPEAKER_XX` gets a distinct gTTS language/accent so voices are distinguishable in the output.
 
 ---
 
@@ -41,7 +78,7 @@ VoxDub takes any video file, strips the audio, transcribes the speech with Whisp
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/voxdub.git
+git clone https://github.com/HarshDevJourney/VoxDub.git
 cd voxdub
 ```
 
@@ -71,7 +108,7 @@ Create a `.env` file in the project root:
 HF_TOKEN=your_huggingface_token_here
 ```
 
-Get your free token at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). It's used for speaker diarization (identifying who is speaking).
+Get your free token at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). It is used for speaker diarization (identifying who is speaking).
 
 ### 5. Run
 
@@ -107,28 +144,6 @@ voxdub/
 
 ---
 
-## How the pipeline works
-
-```
-video.mp4
-    │
-    ├─ FFmpeg ──────────────────► audio.wav  +  video_only.mp4
-    │
-    ├─ Whisper + PyAnnote ──────► [{ speaker, start, end, text }, ...]
-    │
-    ├─ deep_translator ─────────► [{ speaker, start, end, text (translated) }, ...]
-    │
-    ├─ gTTS + FFmpeg ───────────► dubbed.mp3
-    │   (per-speaker voices,         (clips overlaid at correct timestamps)
-    │    speed-fitted to slots)
-    │
-    └─ FFmpeg merge ────────────► final_dubbed.mp4
-```
-
-Speaker voices are assigned from a map — each `SPEAKER_XX` gets a distinct gTTS language/accent so voices are distinguishable in the output.
-
----
-
 ## Requirements
 
 ```txt
@@ -146,35 +161,14 @@ FFmpeg is bundled via `imageio-ffmpeg` — no system install needed on Windows o
 
 ---
 
-## Troubleshooting
-
-**Merge fails with exit code 4294967294**  
-This is a Windows FFmpeg crash on `-c:v copy` with variable frame rate recordings. The merge service automatically retries with `libx264` re-encoding as a fallback.
-
-**`FileNotFoundError` in dubbing**  
-Make sure you're using the latest `services/dubbing.py` — earlier versions used `pydub` which causes Windows file-lock issues. The current version uses pure FFmpeg with no pydub dependency.
-
-**HF_TOKEN errors**  
-Ensure your `.env` file exists in the project root and contains a valid `HF_TOKEN`. The token needs read access on Hugging Face.
-
-**Slow processing**  
-Whisper transcription and TTS generation are CPU-bound. A 2-minute video typically takes 3–6 minutes on CPU. GPU acceleration is supported automatically if CUDA is available.
-
----
-
 ## Supported languages
 
 Any language pair supported by Google Translate. TTS output quality is best for:
+
 `Hindi · English · Spanish · French · German · Portuguese · Japanese · Arabic`
 
 ---
 
-## License
-
-MIT — free to use, modify, and distribute. Add attribution if you build something cool with it.
-
----
-
 <div align="center">
-Built with Streamlit · Whisper · gTTS · FFmpeg
+Built with Streamlit · Whisper · PyAnnote · gTTS · FFmpeg
 </div>
